@@ -340,3 +340,250 @@ const resolvers = {
   },
 };
 ```
+
+### <span style="color:turquoise">Arrays With Custom Types:</span>
+
+Using our custom User and Post type definitions, we created new queries in our schema for 'users' and 'posts'. In our resolvers, we created filter methods that allow us to filter on the User or Post data based off parameters set by the client
+
+```javascript
+// Type Definitions (schema):
+const typeDefs = gql`
+  type Query {
+    users(query: String): [User!]!
+    posts(query: String): [Post!]!
+    me: User!
+    post: Post!
+  }
+  type User {
+    id: ID!
+    name: String!
+    email: String!
+    age: Int
+  }
+  type Post {
+    id: ID!
+    title: String!
+    body: String!
+    published: Boolean!
+  }
+`;
+// Resolvers
+const resolvers = {
+  Query: {
+    users(parent, args, ctx, info) {
+      if (!args.query) {
+        return users;
+      }
+      return users.filter(user => {
+        return user.name.toLowerCase().includes(args.query.toLowerCase());
+      });
+    },
+
+    posts(parent, args, ctx, info) {
+      if (!args.query) {
+        return posts;
+      }
+      return posts.filter(post => {
+        const isTitleMatch = post.title
+          .toLowerCase()
+          .includes(args.query.toLowerCase());
+        const isBodyMatch = post.body
+          .toLowerCase()
+          .includes(args.query.toLowerCase());
+        return isTitleMatch || isBodyMatch;
+      });
+    },
+  },
+};
+```
+
+---
+
+<br>
+
+## <span style="color:lightgreen">Relational Data:</span>
+
+---
+
+After updating the posts array to include 'author' ID's which will be used to relate to a user object, we can then pull user data based off the author for a post
+
+```javascript
+// Demo Data
+const users = [
+  {
+    id: '1',
+    name: 'James',
+    email: 'james@example.com',
+    age: 25,
+  },
+];
+const posts = [
+  {
+    id: '10',
+    title: 'Course 101',
+    message: '',
+    published: true,
+    author: '1',
+  },
+  {
+    id: '11',
+    title: 'Programming Music',
+    message: '',
+    published: true,
+    author: '1',
+  },
+];
+```
+
+When the query below is run, its first going to run the resolver function for the posts query
+
+```graphql
+query {
+  posts {
+    id
+    title
+    author {
+      name
+    }
+  }
+}
+```
+
+Then GraphQL is going to see what data was requested in the query call, since we asked for author in this case, GraphQL is going to see that author does not live inside of the Post type, so its going to call the author() function for each individual post with the Post object as the parent argument
+
+- parent.author is going to be the string pk given in the posts array
+- we can use this pk to iterate over the User objects to find the correct User object to return
+
+```javascript
+// Type Definitions (schema):
+const typeDefs = gql`
+  type Query {
+    users(query: String): [User!]!
+    posts(query: String): [Post!]!
+    me: User!
+    post: Post!
+  }
+
+  type User {
+    id: ID!
+    name: String!
+    email: String!
+    age: Int
+  }
+
+  type Post {
+    id: ID!
+    title: String!
+    body: String!
+    published: Boolean!
+    author: User!
+  }
+`;
+// Resolvers
+const resolvers = {
+  Query: {
+    users(parent, args, ctx, info) {
+      if (!args.query) {
+        return users;
+      }
+      return users.filter(user => {
+        return user.name.toLowerCase().includes(args.query.toLowerCase());
+      });
+    },
+    posts(parent, args, ctx, info) {
+      if (!args.query) {
+        return posts;
+      }
+      return posts.filter(post => {
+        const isTitleMatch = post.title
+          .toLowerCase()
+          .includes(args.query.toLowerCase());
+        const isBodyMatch = post.body
+          .toLowerCase()
+          .includes(args.query.toLowerCase());
+        return isTitleMatch || isBodyMatch;
+      });
+    },
+
+  Post: {
+    author(parent, args, ctx, info) {
+      return users.find(user => {
+        return user.id === parent.author;
+      });
+    },
+  },
+};
+```
+
+### <span style="color:turquoise">Setting The Reverse Relationship:</span>
+
+Now that we can assocate and grab the user data for each post object, we can also set it up so that we can grab all the posts for each user object
+- We add `posts: [Post!]!` in the User type definition
+- Set up a separate User resolver that we can then use to compare the parent.id to the post.author
+
+```javascript
+// Type Definitions (schema):
+const typeDefs = gql`
+  type Query {
+    users(query: String): [User!]!
+    posts(query: String): [Post!]!
+    me: User!
+    post: Post!
+  }
+  type User {
+    id: ID!
+    name: String!
+    email: String!
+    age: Int
+    posts: [Post!]!
+  }
+  type Post {
+    id: ID!
+    title: String!
+    body: String!
+    published: Boolean!
+    author: User!
+  }
+`;
+// Resolvers
+const resolvers = {
+  Query: {
+    users(parent, args, ctx, info) {
+      if (!args.query) {
+        return users;
+      }
+      return users.filter(user => {
+        return user.name.toLowerCase().includes(args.query.toLowerCase());
+      });
+    },
+    posts(parent, args, ctx, info) {
+      if (!args.query) {
+        return posts;
+      }
+      return posts.filter(post => {
+        const isTitleMatch = post.title
+          .toLowerCase()
+          .includes(args.query.toLowerCase());
+        const isBodyMatch = post.body
+          .toLowerCase()
+          .includes(args.query.toLowerCase());
+        return isTitleMatch || isBodyMatch;
+      });
+    },
+  },
+  Post: {
+    author(parent, args, ctx, info) {
+      return users.find(user => {
+        return user.id === parent.author;
+      });
+    },
+  },
+  User: {
+    posts(parent, args, ctx, info) {
+      return posts.filter(post => {
+        return post.author === parent.id;
+      });
+    },
+  },
+};
+```
