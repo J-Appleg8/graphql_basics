@@ -13,7 +13,7 @@ td {
 }
 </style>
 
-# GraphQL Basics
+# GraphQL Basics: Schemas and Queries
 
 ## <span style="color:lightgreen">Creating a GraphQL API</span>
 
@@ -518,6 +518,7 @@ const resolvers = {
 ### <span style="color:turquoise">Setting The Reverse Relationship:</span>
 
 Now that we can assocate and grab the user data for each post object, we can also set it up so that we can grab all the posts for each user object
+
 - We add `posts: [Post!]!` in the User type definition
 - Set up a separate User resolver that we can then use to compare the parent.id to the post.author
 
