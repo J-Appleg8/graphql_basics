@@ -80,7 +80,7 @@ const typeDefs = `
         hello: String
     }
 `;
-// Resolvers
+// Resolvers:
 const resolvers = {
   Query: {
     hello() {
@@ -88,7 +88,7 @@ const resolvers = {
     },
   },
 };
-// Start Server
+// Start Server:
 const server = new GraphQLServer({
   typeDefs,
   resolvers,
@@ -107,9 +107,11 @@ server.start(() => {
 
 ---
 
-Using each of the 5 Scalar types, set up a new set of resources
+Using each of the 5 Scalar types, set up a new set of resources:
 
-- Not using ! after a type definition means the returned value can be null
+- String, Boolean, Int, Float, ID
+
+NOTE: Not using ! after a type definition means the returned value can be null
 
 ```javascript
 // Type Definitions (schema):
@@ -122,7 +124,7 @@ const typeDefs = `
        gpa: Float
     }
 `;
-// Resolvers
+// Resolvers:
 const resolvers = {
   Query: {
     id() {
@@ -151,3 +153,154 @@ const resolvers = {
 ## <span style="color:lightgreen">Creating Custom Types:</span>
 
 ---
+
+For our example use in creating a blogging app, we're going to have custom types for all of the different types of data we have.
+
+For example, custom types to represent each of these fields, which would have their own specified fields:
+
+- User
+- Post
+- Comment
+
+### <span style="color:turquoise">Building out the User type schema:</span>
+
+Type Definitions (schema):
+
+- Note that we set up an additional type definition in the application schema: one for 'Query' and one for 'User'
+
+Resolvers:
+
+- Note that we created a resolver function for me() since that is what we reference for the Query definition, but we return an object since an object will be returned when User is queried from 'me: User'
+
+```javascript
+// Type Definitions (schema):
+const typeDefs = `
+    type Query {
+       me: User
+    }
+    type User {
+        id: ID!
+        name: String!
+        email: String!
+        age: Int
+    }
+`;
+// Resolvers:
+const resolvers = {
+  Query: {
+    me() {
+      return {
+        id: '123098',
+        name: 'Mike',
+        email: 'Mike@example.com',
+        age: 28,
+      };
+    },
+  },
+};
+```
+
+Then we query our new dataset in GraphQL:
+
+```graphql
+query {
+  me {
+    id
+    name
+    email
+    age
+  }
+}
+```
+
+---
+
+<br>
+
+## <span style="color:lightgreen">Operation Arguments:</span>
+
+---
+
+This will allow us to pass data from the client to the server
+
+There are 4 arguments that get passed to all resolver functions:
+
+**parent:**
+
+- Very common and useful when working with relational data
+- Ex: if a user has many posts, then the parent argument is used when figuring out how to get the users posts
+
+**args:**
+
+- Contains the operation arguments supplied to the resolver
+
+**context:**
+
+- Typically shortened to 'ctx' - is used for contextual data
+- Ex: If a user is logged in, the context might contain the ID of that user so that it can be accessed throughout the application
+
+**info:**
+
+- Contains information about the actual operations that were sent along to the server
+
+### <span style="color:turquoise">Using Resolver args:</span>
+
+Using the 'args' argument in the `greeting()` resolver, we pass a name as an argument into the query call with GraphQL:
+
+```graphql
+query {
+  greeting(name: "James")
+  me {
+    id
+    name
+    email
+    age
+  }
+  post {
+    id
+    title
+    body
+    published
+  }
+}
+```
+
+And extract that name in the resolver function from the 'args' argument in order to conditionally return a response based on if a name was provided:
+
+```javascript
+// Type Definitions (schema):
+const typeDefs = `
+    type Query {
+        greeting(name: String, position: String): String!
+        me: User!
+        post: Post!
+    }
+    type User {
+        id: ID!
+        name: String!
+        email: String!
+        age: Int
+    }
+`;
+// Resolvers:
+const resolvers = {
+  Query: {
+    greeting(parent, args, ctx, info) {
+      console.log(args);
+      if (args.name) {
+        return `Hello ${args.name}! You are the worst ${args.position}`;
+      } else {
+        return 'Hello';
+      }
+    },
+    me() {
+      return {
+        id: '123098',
+        name: 'Mike',
+        email: 'Mike@example.com',
+        age: 28,
+      };
+    },
+  },
+};
+```

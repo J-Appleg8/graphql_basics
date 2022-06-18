@@ -1,19 +1,26 @@
 import { GraphQLServer } from 'graphql-yoga';
 
-// GraphQL Scalar Types:
-// String, Boolean, Int, Float, ID
-
 ////////////////////////////////////////////////////////////
 // Type Definitions (schema):
 // Not using ! after a type definition means the returned value can be null
 const typeDefs = `
     type Query {
-       id: ID!
-       title: String!
-       price: Float!
-       releaseYear: Int
-       rating: Float
-       inStock: Boolean!
+        greeting(name: String, position: String): String!
+        add(a: Float!, b: Float!): Float!
+        me: User!
+        post: Post!
+    }
+    type User {
+        id: ID!
+        name: String!
+        email: String!
+        age: Int
+    }
+    type Post {
+        id: ID!
+        title: String!
+        body: String!
+        published: Boolean!
     }
 `;
 
@@ -21,23 +28,31 @@ const typeDefs = `
 // Resolvers
 const resolvers = {
   Query: {
-    id() {
-      return 'abc123';
+    greeting(parent, args, ctx, info) {
+      if (args.name) {
+        return `Hello ${args.name}! You are the worst ${args.position}`;
+      } else {
+        return 'Hello';
+      }
     },
-    title() {
-      return 'Book';
+    add(parent, args, ctx, info) {
+      return args.a + args.b;
     },
-    price() {
-      return 19.95;
+    me() {
+      return {
+        id: '123098',
+        name: 'Mike',
+        email: 'Mike@example.com',
+        age: 28,
+      };
     },
-    releaseYear() {
-      return null;
-    },
-    rating() {
-      return 4.5;
-    },
-    inStock() {
-      return true;
+    post() {
+      return {
+        id: 'abc123',
+        title: 'GraphQL 101',
+        body: 'Basic shit so far with GraphQL',
+        published: true,
+      };
     },
   },
 };
