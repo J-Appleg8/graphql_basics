@@ -1,10 +1,54 @@
-import myLocation, { message, name, getGreeting } from './myModule';
-import myAdd, { subtract } from './math';
+import { GraphQLServer } from 'graphql-yoga';
 
-console.log(name);
-console.log(myLocation);
-console.log(message);
-console.log(getGreeting(name));
+// GraphQL Scalar Types:
+// String, Boolean, Int, Float, ID
 
-console.log(myAdd(1, 2));
-console.log(subtract(5, 3));
+////////////////////////////////////////////////////////////
+// Type Definitions (schema):
+// Not using ! after a type definition means the returned value can be null
+const typeDefs = `
+    type Query {
+       id: ID!
+       title: String!
+       price: Float!
+       releaseYear: Int
+       rating: Float
+       inStock: Boolean!
+    }
+`;
+
+////////////////////////////////////////////////////////////
+// Resolvers
+const resolvers = {
+  Query: {
+    id() {
+      return 'abc123';
+    },
+    title() {
+      return 'Book';
+    },
+    price() {
+      return 19.95;
+    },
+    releaseYear() {
+      return null;
+    },
+    rating() {
+      return 4.5;
+    },
+    inStock() {
+      return true;
+    },
+  },
+};
+
+////////////////////////////////////////////////////////////
+// Start Server
+const server = new GraphQLServer({
+  typeDefs,
+  resolvers,
+});
+
+server.start(() => {
+  console.log('The server is up!');
+});
