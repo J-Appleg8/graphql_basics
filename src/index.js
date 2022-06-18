@@ -1,27 +1,30 @@
 import { GraphQLServer } from 'graphql-yoga';
 
+const gql = String.raw;
+
 ////////////////////////////////////////////////////////////
 // Type Definitions (schema):
 // Not using ! after a type definition means the returned value can be null
-const typeDefs = `
-    type Query {
-        greeting(name: String, position: String): String!
-        add(a: Float!, b: Float!): Float!
-        me: User!
-        post: Post!
-    }
-    type User {
-        id: ID!
-        name: String!
-        email: String!
-        age: Int
-    }
-    type Post {
-        id: ID!
-        title: String!
-        body: String!
-        published: Boolean!
-    }
+const typeDefs = gql`
+  type Query {
+    greeting(name: String, position: String): String!
+    add(numbers: [Float!]!): Float!
+    grades: [Int!]!
+    me: User!
+    post: Post!
+  }
+  type User {
+    id: ID!
+    name: String!
+    email: String!
+    age: Int
+  }
+  type Post {
+    id: ID!
+    title: String!
+    body: String!
+    published: Boolean!
+  }
 `;
 
 ////////////////////////////////////////////////////////////
@@ -36,7 +39,15 @@ const resolvers = {
       }
     },
     add(parent, args, ctx, info) {
-      return args.a + args.b;
+      if (args.numbers.length === 0) {
+        return 0;
+      }
+      return args.numbers.reduce((accumulator, currentValue) => {
+        return accumulator + currentValue;
+      });
+    },
+    grades(parent, args, ctx, info) {
+      return [99, 80, 93];
     },
     me() {
       return {

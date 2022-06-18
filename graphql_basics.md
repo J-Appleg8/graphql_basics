@@ -75,10 +75,10 @@ Start Server:
 import { GraphQLServer } from 'graphql-yoga';
 
 // Type Definitions (schema):
-const typeDefs = `
-    type Query {
-        hello: String
-    }
+const typeDefs = gql`
+  type Query {
+    hello: String
+  }
 `;
 // Resolvers:
 const resolvers = {
@@ -115,14 +115,14 @@ NOTE: Not using ! after a type definition means the returned value can be null
 
 ```javascript
 // Type Definitions (schema):
-const typeDefs = `
-    type Query {
-       id: ID!
-       name: String!
-       age: Int!
-       employed: Boolean!
-       gpa: Float
-    }
+const typeDefs = gql`
+  type Query {
+    id: ID!
+    name: String!
+    age: Int!
+    employed: Boolean!
+    gpa: Float
+  }
 `;
 // Resolvers:
 const resolvers = {
@@ -174,16 +174,16 @@ Resolvers:
 
 ```javascript
 // Type Definitions (schema):
-const typeDefs = `
-    type Query {
-       me: User
-    }
-    type User {
-        id: ID!
-        name: String!
-        email: String!
-        age: Int
-    }
+const typeDefs = gql`
+  type Query {
+    me: User
+  }
+  type User {
+    id: ID!
+    name: String!
+    email: String!
+    age: Int
+  }
 `;
 // Resolvers:
 const resolvers = {
@@ -269,18 +269,18 @@ And extract that name in the resolver function from the 'args' argument in order
 
 ```javascript
 // Type Definitions (schema):
-const typeDefs = `
-    type Query {
-        greeting(name: String, position: String): String!
-        me: User!
-        post: Post!
-    }
-    type User {
-        id: ID!
-        name: String!
-        email: String!
-        age: Int
-    }
+const typeDefs = gql`
+  type Query {
+    greeting(name: String, position: String): String!
+    me: User!
+    post: Post!
+  }
+  type User {
+    id: ID!
+    name: String!
+    email: String!
+    age: Int
+  }
 `;
 // Resolvers:
 const resolvers = {
@@ -300,6 +300,42 @@ const resolvers = {
         email: 'Mike@example.com',
         age: 28,
       };
+    },
+  },
+};
+```
+
+---
+
+<br>
+
+## <span style="color:lightgreen">Working With Arrays:</span>
+
+---
+
+Setting your schema to accept arrays is done by setting the type as an array [], then specifying the expected types that should be in the array
+
+```javascript
+// Type Definitions (schema):
+const typeDefs = gql`
+  type Query {
+    add(numbers: [Float!]!): Float!
+    grades: [Int!]!
+  }
+`;
+// Resolvers
+const resolvers = {
+  Query: {
+    add(parent, args, ctx, info) {
+      if (args.numbers.length === 0) {
+        return 0;
+      }
+      return args.numbers.reduce((accumulator, currentValue) => {
+        return accumulator + currentValue;
+      });
+    },
+    grades(parent, args, ctx, info) {
+      return [99, 80, 93];
     },
   },
 };
