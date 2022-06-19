@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --exec ./node_modules/.bin/babel-node src/index.js",
+    "start": "nodemon --exec ./node_modules/.bin/babel-node src/index.js --ext js, graphql",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,6 +19,7 @@
   "homepage": "https://github.com/J-Appleg8/graphql_basics#readme",
   "dependencies": {
     "babel-cli": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "graphql-yoga": "^1.16.7",
     "uuid": "^3.3.2"

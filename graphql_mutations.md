@@ -204,3 +204,79 @@ mutation {
   }
 }
 ```
+
+---
+
+<br>
+
+## <span style="color:lightgreen">Using Input Type on Mutations:</span>
+
+---
+
+Example below, the mutations were updated so that they reference the input type that we want to use (instead of listing out each expected type in the mutation type itself)
+
+```javascript
+  type Mutation {
+    createUser(data: CreateUserInput): User!
+    createPost(data: CreatePostInput): Post!
+    createComment(data: CreateCommentInput): Comment!
+  }
+
+  input CreateUserInput {
+    name: String!
+    email: String!
+    age: Int
+  }
+  input CreatePostInput {
+    title: String!
+    body: String!
+    published: Boolean!
+    author: ID!
+  }
+  input CreateCommentInput {
+    text: String!
+    author: ID!
+    post: ID!
+  }
+```
+
+The mutation resolver also needs to be updated so that it references args.data instead of just args
+
+```javascript
+// Resolvers
+const resolvers = {
+  Mutation: {
+    createUser(parent, args, ctx, info) {
+      const emailTaken = users.some(user => user.email === args.data.email);
+
+      if (emailTaken) {
+        throw new Error('Email is already taken!');
+      }
+
+      const user = { id: uuidv4(), ...args.data };
+      users.push(user);
+      return user;
+    },
+};
+```
+
+Then we just change our queries slightly so that we are populating the 'data' attribute with the new user information
+
+```graphql
+mutation {
+  createUser(data: { name: "John", email: "john@example.com", age: 32 }) {
+    id
+    name
+    email
+    age
+  }
+}
+```
+
+---
+
+<br>
+
+## <span style="color:lightgreen">Deleting Data With Mutations:</span>
+
+---
