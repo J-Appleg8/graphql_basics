@@ -1,4 +1,12 @@
 ##################################################
+# Enums
+enum MutationType {
+  CREATED
+  UPDATED
+  DELETED
+}
+
+##################################################
 # Type Definitions (schema)
 type Query {
   users(query: String): [User!]!
@@ -33,6 +41,16 @@ type Comment {
   post: Post!
 }
 
+type PostSubscriptionPayload {
+  mutation: MutationType!
+  data: Post!
+}
+
+type CommentSubscriptionPayload {
+  mutation: MutationType!
+  data: Comment!
+}
+
 ##################################################
 # Mutations
 type Mutation {
@@ -47,6 +65,13 @@ type Mutation {
   createComment(data: CreateCommentInput): Comment!
   updateComment(id: ID!, data: UpdateCommentInput!): Comment!
   deleteComment(id: ID!): Comment!
+}
+
+##################################################
+# Subscriptions
+type Subscription {
+  post: PostSubscriptionPayload!
+  comment(postId: ID!): CommentSubscriptionPayload!
 }
 
 ##################################################
