@@ -1,19 +1,51 @@
 import uuidv4 from 'uuid/v4';
 
 const Mutation = {
+  ////////////////////////////////////////////////////////////
+  // User Mutations
   createUser(parent, args, { db }, info) {
-    const emailTaken = db.users.some(user => user.email === args.data.email);
+    const { data } = args;
+    const emailTaken = db.users.some(user => user.email === data.email);
 
     if (emailTaken) {
       throw new Error('Email is already taken!');
     }
-    const user = { id: uuidv4(), ...args.data };
+    const user = { id: uuidv4(), ...data };
     db.users.push(user);
+
+    return user;
+  },
+
+  updateUser(parent, args, { db }, info) {
+    const { id, data } = args;
+    const user = db.users.find(user => user.id === id);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (typeof data.email === 'string') {
+      const emailTaken = db.users.some(user => user.email === data.email);
+      if (emailTaken) {
+        throw new Error('Email is already taken!');
+      }
+      user.email = data.email;
+    }
+
+    if (typeof data.name === 'string') {
+      user.name = data.name;
+    }
+
+    if (typeof data.age !== 'undefined') {
+      user.age = data.age;
+    }
+
     return user;
   },
 
   deleteUser(parent, args, { db }, info) {
-    const userIndex = db.users.findIndex(user => user.id === args.id);
+    const { id, data } = args;
+    const userIndex = db.users.findIndex(user => user.id === id);
 
     if (userIndex === -1) {
       throw new Error('User not found');
@@ -21,17 +53,19 @@ const Mutation = {
     const deletedUsers = db.users.splice(userIndex, 1);
 
     db.posts = db.posts.filter(post => {
-      const match = post.author === args.id;
+      const match = post.author === id;
       if (match) {
         db.comments = db.comments.filter(comment => comment.post !== post.id);
       }
       return !match;
     });
-    db.comments = db.comments.filter(comment => comment.author !== args.id);
+    db.comments = db.comments.filter(comment => comment.author !== id);
 
     return deletedUsers[0];
   },
 
+  ////////////////////////////////////////////////////////////
+  // Post Mutations
   createPost(parent, args, { db }, info) {
     const userExists = db.users.some(user => user.id === args.data.author);
 
@@ -40,6 +74,29 @@ const Mutation = {
     }
     const post = { id: uuidv4(), ...args.data };
     db.posts.push(post);
+    return post;
+  },
+
+  updatePost(parent, args, { db }, info) {
+    const { id, data } = args;
+    const post = db.posts.find(post => post.id === id);
+
+    if (!post) {
+      throw new Error('Post not found');
+    }
+
+    if (typeof data.title === 'string') {
+      post.title = data.title;
+    }
+
+    if (typeof data.body === 'string') {
+      post.body = data.body;
+    }
+
+    if (typeof data.published === 'boolean') {
+      post.published = data.published;
+    }
+
     return post;
   },
 
@@ -55,6 +112,8 @@ const Mutation = {
     return deletedPosts[0];
   },
 
+  ////////////////////////////////////////////////////////////
+  // Comment Mutations
   createComment(parent, args, { db }, info) {
     const userExists = db.users.some(user => user.id === args.data.author);
     const postExists = db.posts.some(post => post.id === args.data.post && post.published);
@@ -64,6 +123,21 @@ const Mutation = {
     }
     const comment = { id: uuidv4(), ...args.data };
     db.comments.push(comment);
+    return comment;
+  },
+
+  updateComment(parent, args, { db }, info) {
+    const { id, data } = args;
+    const comment = db.comments.find(comment => comment.id === id);
+
+    if (!comment) {
+      throw new Error('Comment not found');
+    }
+
+    if (typeof data.text === 'string') {
+      comment.text = data.text;
+    }
+
     return comment;
   },
 
