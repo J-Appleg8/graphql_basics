@@ -42,7 +42,8 @@ Application Resolvers are a set of functions that are defined for each of the op
 - For example: In the screenshot of the application schema above, a resolver was defined for the 'hello' query, the 'course' query, the 'courseInstructor' query and the 'me' query.
   - Those functions know what to do when that query runs, they know how to get and return the correct data
 
-```graphql
+```javascript
+// GraphQL
 query {
   hello
   course
@@ -202,7 +203,8 @@ const resolvers = {
 
 Then we query our new dataset in GraphQL:
 
-```graphql
+```javascript
+// GraphQL
 query {
   me {
     id
@@ -247,7 +249,8 @@ There are 4 arguments that get passed to all resolver functions:
 
 Using the 'args' argument in the `greeting()` resolver, we pass a name as an argument into the query call with GraphQL:
 
-```graphql
+```javascript
+// GraphQL
 query {
   greeting(name: "James")
   me {
@@ -384,12 +387,8 @@ const resolvers = {
         return posts;
       }
       return posts.filter(post => {
-        const isTitleMatch = post.title
-          .toLowerCase()
-          .includes(args.query.toLowerCase());
-        const isBodyMatch = post.body
-          .toLowerCase()
-          .includes(args.query.toLowerCase());
+        const isTitleMatch = post.title.toLowerCase().includes(args.query.toLowerCase());
+        const isBodyMatch = post.body.toLowerCase().includes(args.query.toLowerCase());
         return isTitleMatch || isBodyMatch;
       });
     },
@@ -437,7 +436,8 @@ const posts = [
 
 When the query below is run, its first going to run the resolver function for the posts query
 
-```graphql
+```javascript
+// GraphQL
 query {
   posts {
     id
@@ -562,12 +562,8 @@ const resolvers = {
         return posts;
       }
       return posts.filter(post => {
-        const isTitleMatch = post.title
-          .toLowerCase()
-          .includes(args.query.toLowerCase());
-        const isBodyMatch = post.body
-          .toLowerCase()
-          .includes(args.query.toLowerCase());
+        const isTitleMatch = post.title.toLowerCase().includes(args.query.toLowerCase());
+        const isBodyMatch = post.body.toLowerCase().includes(args.query.toLowerCase());
         return isTitleMatch || isBodyMatch;
       });
     },

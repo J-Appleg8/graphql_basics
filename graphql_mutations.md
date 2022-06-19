@@ -111,12 +111,7 @@ const typeDefs = gql`
   }
   type Mutation {
     createUser(name: String!, email: String!, age: Int): User!
-    createPost(
-      title: String!
-      body: String!
-      published: Boolean!
-      author: ID!
-    ): Post!
+    createPost(title: String!, body: String!, published: Boolean!, author: ID!): Post!
   }
   type User {
     id: ID!
@@ -176,14 +171,15 @@ const resolvers = {
       };
       posts.push(post);
       return post;
+    },
   },
 };
 ```
 
 Now if we run our createPost mutation, we can immediately access to the related data as well in the query, such as the author (User) object information or the comments information
 
-```graphql
-# GraphQL
+```javascript
+// GraphQL
 mutation {
   createPost(
     title: "My New Post"
@@ -262,7 +258,8 @@ const resolvers = {
 
 Then we just change our queries slightly so that we are populating the 'data' attribute with the new user information
 
-```graphql
+```javascript
+// GraphQL
 mutation {
   createUser(data: { name: "John", email: "john@example.com", age: 32 }) {
     id
@@ -277,6 +274,68 @@ mutation {
 
 <br>
 
-## <span style="color:lightgreen">Deleting Data With Mutations:</span>
+## <span style="color:lightgreen">Updating & Deleting Data With Mutations:</span>
 
 ---
+
+Updating data using mutations:
+
+```javascript
+// GraphQL
+type Mutation {
+  createUser(data: CreateUserInput): User!
+  updateUser(id: ID!, data: UpdateUserInput!): User!
+  deleteUser(id: ID!): User!
+}
+
+input CreateUserInput {
+  name: String!
+  email: String!
+  age: Int
+}
+input UpdateUserInput {
+  name: String
+  email: String
+  age: Int
+}
+```
+
+Mutations.js file:
+
+```javascript
+const Mutation = {
+  updatePost(parent, args, { db }, info) {
+    const { id, data } = args;
+    const post = db.posts.find(post => post.id === id);
+
+    if (!post) {
+      throw new Error('Post not found');
+    }
+
+    if (typeof data.title === 'string') {
+      post.title = data.title;
+    }
+
+    if (typeof data.body === 'string') {
+      post.body = data.body;
+    }
+
+    if (typeof data.published === 'boolean') {
+      post.published = data.published;
+    }
+
+    return post;
+  },
+  deletePost(parent, args, { db }, info) {
+    const postIndex = db.posts.findIndex(post => post.id === args.id);
+
+    if (postIndex === -1) {
+      throw new Error('Post not found');
+    }
+    const deletedPosts = db.posts.splice(postIndex, 1);
+    db.comments = db.comments.filter(comment => comment.post !== args.id);
+
+    return deletedPosts[0];
+  },
+};
+```
